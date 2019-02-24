@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="翻译,">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="本文翻译自：https://flink.apache.org/zh/reviewing-prs.html   本指南适用于希望帮助审核代码的所有提交者和贡献者。感谢你的努力 - 良好的审核是开源项目中最重要也是最关键的部分之一。本文旨在协助社区开展代码审核工作，以达到下列目的：  让贡献者拥有良好的贡献体验。 将审核过程结构化，以涵盖所有需要检查的重要方面。 保持 Flink 代码的高质量。 避免">
+<meta name="keywords" content="翻译">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【翻译】在 Apache Flink 社区中如何审核 PR">
+<meta property="og:url" content="http://yoursite.com/2019/02/24/【翻译】在-Apache-Flink-社区中如何审核-PR/index.html">
+<meta property="og:site_name" content="浅然的部落格">
+<meta property="og:description" content="本文翻译自：https://flink.apache.org/zh/reviewing-prs.html   本指南适用于希望帮助审核代码的所有提交者和贡献者。感谢你的努力 - 良好的审核是开源项目中最重要也是最关键的部分之一。本文旨在协助社区开展代码审核工作，以达到下列目的：  让贡献者拥有良好的贡献体验。 将审核过程结构化，以涵盖所有需要检查的重要方面。 保持 Flink 代码的高质量。 避免">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2019-02-24T13:29:19.047Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="【翻译】在 Apache Flink 社区中如何审核 PR">
+<meta name="twitter:description" content="本文翻译自：https://flink.apache.org/zh/reviewing-prs.html   本指南适用于希望帮助审核代码的所有提交者和贡献者。感谢你的努力 - 良好的审核是开源项目中最重要也是最关键的部分之一。本文旨在协助社区开展代码审核工作，以达到下列目的：  让贡献者拥有良好的贡献体验。 将审核过程结构化，以涵盖所有需要检查的重要方面。 保持 Flink 代码的高质量。 避免">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2019/02/24/【翻译】在-Apache-Flink-社区中如何审核-PR/">
+
+
+
+
+
+  <title>【翻译】在 Apache Flink 社区中如何审核 PR | 浅然的部落格</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+    <a href="https://github.com/ash-ali"><img width="149" height="149" src="https://github.blog/wp-content/uploads/2008/12/forkme_right_darkblue_121621.png?resize=149%2C149" class="attachment-full size-full" alt="Fork me on GitHub" data-recalc-dims="1" style="position:absolute;top:0;right:0;border:0;"></a>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">浅然的部落格</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/02/24/【翻译】在-Apache-Flink-社区中如何审核-PR/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="浅然">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="浅然的部落格">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">【翻译】在 Apache Flink 社区中如何审核 PR</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-02-24T21:23:05+08:00">
+                2019-02-24
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Flink/" itemprop="url" rel="index">
+                    <span itemprop="name">Flink</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>本文翻译自：<a href="https://flink.apache.org/zh/reviewing-prs.html" target="_blank" rel="noopener">https://flink.apache.org/zh/reviewing-prs.html</a></p>
+<hr>
+
+<p>本指南适用于希望帮助审核代码的所有提交者和贡献者。感谢你的努力 - 良好的审核是开源项目中最重要也是最关键的部分之一。本文旨在协助社区开展代码审核工作，以达到下列目的：</p>
+<ul>
+<li>让贡献者拥有良好的贡献体验。</li>
+<li>将审核过程结构化，以涵盖所有需要检查的重要方面。</li>
+<li>保持 Flink 代码的高质量。</li>
+<li>避免贡献者和审核者花费大量时间完善代码却最终被拒绝提交的情况发生。</li>
+</ul>
+<hr>
+<h2 id="审核清单"><a href="#审核清单" class="headerlink" title="审核清单"></a>审核清单</h2><p>每次审核都需要检查以下五个方面。我们建议按照以下顺序进行检查，以避免在还没有就是否添加某项功能或需要改动达成共识之前，就花费时间进行详细的代码质量审核。</p>
+<h3 id="1-贡献的描述是否清晰？"><a href="#1-贡献的描述是否清晰？" class="headerlink" title="1.贡献的描述是否清晰？"></a>1.贡献的描述是否清晰？</h3><p>检查贡献是否有充分的描述以方便审核，不重要的更改和修复不需要很长的描述，任何改变功能或行为的 pull request 都需要描述这些改变的重点, 以便知道审核什么内容(并且不必钻研代码来了解更改的作用)。</p>
+<p>需要更长描述的更改，理想情况下基于邮件列表或 JIRA 中的事先设计讨论，可以简单地链接到那里或从那里复制描述。</p>
+<p><strong>如果在不查看代码的情况下能回答以下问题2、3、4，则该贡献得到了很好的描述。</strong></p>
+<hr>
+<h3 id="2-是否一致认为这一变更或者功能应该进入-Flink？"><a href="#2-是否一致认为这一变更或者功能应该进入-Flink？" class="headerlink" title="2.是否一致认为这一变更或者功能应该进入 Flink？"></a>2.是否一致认为这一变更或者功能应该进入 Flink？</h3><p>对于错误修复，只有在需要相对大量改动或可能破坏现有程序和设置时才需要检查。</p>
+<p>理想情况下, 除了错误修复和少量的添加或扩展的情况外，该问题可以从 Jira issue 或开发者邮件列表的讨论中找到答案。在这种情况下，此问题可以立即标记为已解决。对于未事先达成共识而创建的 pull requests，此问题需要作为审核的一部分予以回答。</p>
+<p>需从以下几个方面判断是否应将改动引入Flink：</p>
+<ul>
+<li>贡献中改变特征或组件行为的做法，是否会对先前用户的代码或设置造成影响？如果是，则需要进行讨论并同意这种变更是值得的。</li>
+<li>这个贡献在概念上是否适合 Flink ？它是否是某种极端特例，反而会将普通场景复杂化或使抽象及 API 变得臃肿？</li>
+<li>该功能是否适合 Flink 的架构？未来它是否会扩展并保持 Flink 的灵活性，或者该功能将来会限制 Flink 的发展吗？</li>
+<li>该功能是一项重要的新增功能（而不是对现有部件的改进）吗？如果是，Flink 社区是否会承诺维护此功能？</li>
+<li>该功能是否为 Flink 用户或开发人员带来了额外的利益？或者它是否会在相关用户或开发人员无法受益的情况下引入回归风险？</li>
+<li>可以将贡献提交至其他仓库（例如 <a href="https://bahir.apache.org" target="_blank" rel="noopener">Apache Bahir</a>）或外部仓库中吗？</li>
+</ul>
+<p>所有这些问题都应在不看代码的前提下从 Jira 和 pull request 中的描述或讨论中得到回答。</p>
+<p><strong>一旦有一个 committer 接受了某个功能、改进或者错误修复，并且没有其他 committer 不同意（lazy consensus 机制），那么就会批准它。</strong> </p>
+<p>如果意见出现分歧，应将讨论转移到各自的 Jira issue 或开发邮件列表中继续进行，直到达成共识。如果变更是由一位 committer 提出的，那么寻求另一位 committer 的批准是最佳做法。</p>
+<hr>
+<h3 id="3-贡献是否需要一些特定的-committer-的关注，这些-committer-有时间投入吗？"><a href="#3-贡献是否需要一些特定的-committer-的关注，这些-committer-有时间投入吗？" class="headerlink" title="3. 贡献是否需要一些特定的 committer 的关注，这些 committer 有时间投入吗？"></a>3. 贡献是否需要一些特定的 committer 的关注，这些 committer 有时间投入吗？</h3><p>一些更改需要特定的 committer 的注意和批准。例如，对性能非常敏感或对分布式协调和容错有关键影响的部件中的更改，这需要一个对相应组件非常熟悉的 committer 的审核。</p>
+<p>根据经验，当 pull request 描述中对模板里问题 “Does this pull request potentially affect one of the following parts” 的回答为 “yes” 时，需要特别注意。</p>
+<p>这个问题可以参考如下回答</p>
+<ul>
+<li><em>Does not need specific attention</em></li>
+<li><em>Needs specific attention for X (X 可以是例如 checkpointing、jobmanager 等)</em></li>
+<li><em>Has specific attention for X by @commiterA, @contributorB</em></li>
+</ul>
+<p><strong>如果 pull request 需要特别关注，则其中一个标记的 committers 或 contributors 应该给出最终批准。</strong></p>
+<hr>
+<h3 id="4-实现的整体方案或架构是否正确？"><a href="#4-实现的整体方案或架构是否正确？" class="headerlink" title="4. 实现的整体方案或架构是否正确？"></a>4. 实现的整体方案或架构是否正确？</h3><p>这是实施修复程序或功能的最佳方法，还是其他方法更容易，更健壮或更易于维护？<br>这个问题应该尽可能地从 pull request 描述（或链接的 Jira ）中得到回答。</p>
+<p>我们建议你在深入了解更改的各个部分进行评论之前先检查这一点。</p>
+<hr>
+<h3 id="5-整体代码质量是否良好，是否符合我们希望在-Flink-中维护的标准？"><a href="#5-整体代码质量是否良好，是否符合我们希望在-Flink-中维护的标准？" class="headerlink" title="5.整体代码质量是否良好，是否符合我们希望在 Flink 中维护的标准？"></a>5.整体代码质量是否良好，是否符合我们希望在 Flink 中维护的标准？</h3><p>这是对实际变更的详细代码审核，包括：</p>
+<ul>
+<li>变更是否按照设计文档或 pull request 说明中的描述进行？</li>
+<li>代码是否遵循正确的软件工程实践？代码是否正确、健壮、可维护、可测试？</li>
+<li>在更改性能敏感部分时，是否对性能进行了优化？</li>
+<li>测试是否覆盖了全部改动？</li>
+<li>测试执行速度是否快？即仅在必要时才使用重量级集成测试？</li>
+<li>代码格式是否遵循 Flink 的 checkstyle 模式？</li>
+<li>代码是否避免引入额外的编译器警告？</li>
+</ul>
+<p>可以在 <a href="!--￼1--&gt;/zh/contribute-code.html#code-style">Flink代码样式页面</a> 中找到一些代码样式指南。</p>
+<h2 id="使用-flinkbot-进行审核"><a href="#使用-flinkbot-进行审核" class="headerlink" title="使用 @flinkbot 进行审核"></a>使用 @flinkbot 进行审核</h2><p>Flink 社区正在使用名为 <a href="https://github.com/flinkbot" target="_blank" rel="noopener">@flinkbot</a> 的服务来帮助审核 pull request。</p>
+<p>针对每个新的 pull request，机器人都会自动发表评论并跟踪审核进度：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">### Review Progress</span><br><span class="line"></span><br><span class="line">* [ ] 1. The description looks good.</span><br><span class="line">* [ ] 2. There is consensus that the contribution should go into to Flink.</span><br><span class="line">* [ ] 3. [Does not need specific attention | Needs specific attention for X | Has attention for X by Y]</span><br><span class="line">* [ ] 4. The architectural approach is sound.</span><br><span class="line">* [ ] 5. Overall code quality is good.</span><br><span class="line"></span><br><span class="line">Please see the [Pull Request Review Guide](https://flink.apache.org/reviewing-prs.html) if you have questions about the review process.</span><br></pre></td></tr></table></figure>
+<p>审核人可以指示机器人（按顺序）勾选方框以指示审核的进度。</p>
+<p>用于批准贡献的描述，请使用 <code>@flinkbot approve description</code> @机器人。<code>consensus</code>、<code>architecture</code> 和 <code>quality</code> 与之类似。</p>
+<p>要批准所有方面，请在 pull request 中添加一条带有 <code>@flinkbot approve all</code> 的新评论。</p>
+<p>提醒他人关注的语法是 <code>@flinkbot attention @username1 [@username2 ..]</code>。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/翻译/" rel="tag"># 翻译</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/02/20/Apache-Flink自述理解与代码/" rel="next" title="Apache Flink自述理解与代码">
+                <i class="fa fa-chevron-left"></i> Apache Flink自述理解与代码
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.png" alt="浅然">
+            
+              <p class="site-author-name" itemprop="name">浅然</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">3</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">2</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">3</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/ash-ali" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-globe"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://blog.csdn.net/w_linux" target="_blank" title="CSDN">
+                      
+                        <i class="fa fa-fw fa-globe"></i>CSDN</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#审核清单"><span class="nav-number">1.</span> <span class="nav-text">审核清单</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-贡献的描述是否清晰？"><span class="nav-number">1.1.</span> <span class="nav-text">1.贡献的描述是否清晰？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-是否一致认为这一变更或者功能应该进入-Flink？"><span class="nav-number">1.2.</span> <span class="nav-text">2.是否一致认为这一变更或者功能应该进入 Flink？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-贡献是否需要一些特定的-committer-的关注，这些-committer-有时间投入吗？"><span class="nav-number">1.3.</span> <span class="nav-text">3. 贡献是否需要一些特定的 committer 的关注，这些 committer 有时间投入吗？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-实现的整体方案或架构是否正确？"><span class="nav-number">1.4.</span> <span class="nav-text">4. 实现的整体方案或架构是否正确？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-整体代码质量是否良好，是否符合我们希望在-Flink-中维护的标准？"><span class="nav-number">1.5.</span> <span class="nav-text">5.整体代码质量是否良好，是否符合我们希望在 Flink 中维护的标准？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用-flinkbot-进行审核"><span class="nav-number">2.</span> <span class="nav-text">使用 @flinkbot 进行审核</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">浅然</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i> 访问人数
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      人
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i> 总访问量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
